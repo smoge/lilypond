@@ -145,14 +145,14 @@
 + LP_RhythmTreeContainer {
 	formatStr {
 		var str="";
-		//if (this.isContainer) {
-		(this.depth + 2).do { str = str ++ "\t" };
 		if (isTuplet) {
+			if (this.depth > 0) { str = str ++ "\n" };
+			(this.depth + 2).do { str = str ++ "\t" };
 			str = str ++ "\\tuplet " ++ tupletNumerator.asString ++ "/" ++ tupletDenominator.asString + "{";
 		} {
+			(this.depth + 2).do { str = str ++ "\t" };
 			str = str ++ "{";
 		};
-		//};
 		children.do { |child| str = str ++ child.lpStr };
 		str = str ++ "\n";
 		(this.depth + 2).do { str = str ++ "\t" };
@@ -163,10 +163,7 @@
 
 + LP_Tuplet {
 	lpStr {
-		var str="";
-		//str = str ++ "\\tuplet " ++ tupletNumerator.asString ++ "/" ++ tupletDenominator.asString + "{";
-		str = str ++ this.formatStr;
-		^str;
+		^this.formatStr;
 	}
 }
 
@@ -177,7 +174,6 @@
 			str = "\t\t\\time " ++ timeSignature.lpStr ++ "\n";
 		};
 		commands.do { |command| str = str ++ "\n\t\t\\" ++ command.asString + "\n" };
-		//str = str ++ "{";
 		str = str ++ this.formatStr ++ "\n";
 		^str;
 	}

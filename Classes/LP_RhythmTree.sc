@@ -9,7 +9,7 @@ LP_RhythmTreeContainer : LP_Container {
 			case
 			{ child.isNumber && { child > 0 } } { LP_Note(60, child.asInteger).isTiedToPrev_(child.isFloat) }
 			{ child.isNumber && { child < 0 } } { LP_Rest(child.asInteger) }
-			{ child.isArray && { child[1].isArray } } { LP_Tuplet(*child) } // allow rtmtree syntax
+			{ child.isArray && { child[1].isArray } } { LP_Tuplet(*child) } // allow rhythm tree syntax
 			{ child }; // child is already wrapped in LP_Note, LP_Chord, LP_Rest or LP_Tuplet
 		};
 		^super.new(children).init2(duration);
@@ -23,6 +23,10 @@ LP_RhythmTreeContainer : LP_Container {
 		preProlatedDuration = duration ? 1;
 		// second call to init1 allows for recalculation of durs after insertion of LP_TieContainers
 		if (duration.isKindOf(LP_Duration)) { this.init1(duration).init1 };
+		// replace trivial tuplets with their children
+		children.select { |child| child.isKindOf(LP_Tuplet) }.do { |container|
+			if (container.isTuplet.not)  { container.parent.replaceAll(container, container.children) };
+		};
 	}
 	// assign: durations, isTuplet, tupletNumerator, tupletDenominator
 	prolateInnerDurations { |argDuration, children|
@@ -54,7 +58,6 @@ LP_RhythmTreeContainer : LP_Container {
 		tupletRatio = [tupletNumerator, tupletDenominator];
 		# tupletNumerator, tupletDenominator = (tupletRatio / tupletRatio.reduce(\gcd)).asInteger;
 	}
-	// repeated call on init1 allows for the late addition of LP_TieContainers
 	update {
 		this.init1.init1;
 	}
