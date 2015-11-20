@@ -69,7 +69,7 @@ var measure = LP_Measure([4, 4], [2, LP_Tuplet(4, [1, 1, 1, 1, 1]), 3]);
 LP_File(LP_Score([LP_Staff([measure])])).write;
 )
 /* ----------------------------------------------------------------------------------------------------------------------
-• Notes can be specified by midi number, by lilypond note names, or by a lilypond string
+• Notes can be specified by midi number, by lilypond note name, or by a lilypond string
 ---------------------------------------------------------------------------------------------------------------------- */
 (
 // midi numbers
@@ -127,7 +127,7 @@ LP_File(LP_Score([LP_Staff([measure])])).write;
 ---------------------------------------------------------------------------------------------------------------------- */
 (
 // midi numbers
-var measure = LP_Measure([4, 4], [1, -1, 1, 4.0], [61, [60, 64, 67, 70]]);
+var measure = LP_Measure([4, 4], [1, -1, 1, 4.0], [63, [60, 64, 67, 70]]);
 LP_File(LP_Score([LP_Staff([measure])])).write;
 )
 
@@ -167,7 +167,7 @@ LP_File(LP_Score([LP_Staff([measure])])).write;
 )
 
 (
-// NB: the above example is equivalent to accessing the leaf directly from its container
+// the preceding example is equivalent to accessing the leaf directly from its container
 var measure = LP_Measure([4, 4], [1, -1, 1, 4.0], [61, [60, 64, 67, 70]]);
 measure[2].attach(LP_Articulation('>'));
 LP_File(LP_Score([LP_Staff([measure])])).write;
