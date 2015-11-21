@@ -36,6 +36,7 @@ LP_Selection {
 				LP_Measure, {
 					components = components.select { |node| node.isKindOf(LP_Measure) }.asArray;
 				},
+				//!!! rework to hold LP_Events (see LP_TieSelection below)
 				LP_Event, {
 					var elems;
 					elems = this.selectBy(LP_Leaf).components;
@@ -45,11 +46,13 @@ LP_Selection {
 					}.flat;
 					components = elems;
 				},
+				//!!! rework to hold LP_Events (see LP_TieSelection below)
 				LP_PitchEvent, {
 					var elems;
 					elems = this.selectBy(LP_Event).components.reject { |item| item.type == LP_Rest };
 					components = elems;
 				},
+				//!!! rework to hold LP_Events (see LP_TieSelection below)
 				LP_RestEvent, {
 					var elems;
 					elems = this.selectBy(LP_Event).components.select { |item| item.type == LP_Rest };
@@ -190,14 +193,19 @@ LP_ContiguousSelection : LP_Selection {
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_TieSelection
+!!TODO
+- rename LP_Event
+- include single leaves (not just tied leaves) in each event (same as LogicalTie in Abjad)
 --------------------------------------------------------------------------------------------------------------- */
 LP_TieSelection : LP_ContiguousSelection {
 	*new { |components|
 		^super.new(components);
 	}
+	/* !! REMOVE
 	isTied {
 		^true;
 	}
+	*/
 	isTiedToNext {
 		^components.last.isTiedToNext;
 	}

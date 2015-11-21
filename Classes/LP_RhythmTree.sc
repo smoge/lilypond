@@ -21,8 +21,10 @@ LP_RhythmTreeContainer : LP_Container {
 	}
 	init2 { |duration|
 		preProlatedDuration = duration ? 1;
+		//!!! TODO: remove -- no longer needed ?
 		// second call to init1 allows for recalculation of durs after insertion of LP_TieContainers
-		if (duration.isKindOf(LP_Duration)) { this.init1(duration).init1 };
+		// if (duration.isKindOf(LP_Duration)) { this.init1(duration).init1 };
+		if (duration.isKindOf(LP_Duration)) { this.init1(duration) };
 		// replace trivial tuplets with their children
 		children.select { |child| child.isKindOf(LP_Tuplet) }.do { |container|
 			if (container.isTuplet.not)  { container.parent.replaceAll(container, container.children) };
@@ -58,8 +60,11 @@ LP_RhythmTreeContainer : LP_Container {
 		tupletRatio = [tupletNumerator, tupletDenominator];
 		# tupletNumerator, tupletDenominator = (tupletRatio / tupletRatio.reduce(\gcd)).asInteger;
 	}
-	update {
+	/*update {
 		this.init1.init1;
+	}*/
+	update {
+		this.init1;
 	}
 	// override dup: music trees must always creates a new instance of the copied object
 	dup { |n=2|
@@ -77,6 +82,7 @@ LP_RhythmTreeLeaf : LP_Leaf {
 		if (this.isTiedToPrev) { this.prevLeaf.isTiedToNext_(true) };
 	}
 	duration_ { |argDuration|
+		var preProlatedDurations, children, tempContainer;
 		duration = argDuration; //!!! remove
 		writtenDuration = argDuration;
 		if (duration.isAssignable.not && { this.root != this }) { this.replace(LP_TieContainer(this)) };
@@ -112,6 +118,7 @@ LP_RhythmTreeLeaf : LP_Leaf {
 			// do not attach spanner if an instance of the same type is already attached
 			if (spanners.detect { |elem| elem.isKindOf(attachment.class) }.isNil) {
 				spanners = spanners.add(attachment);
+				if (attachment.isKindOf(LP_Tie)) { this.isTiedToNext_(true) };
 			};
 		};
 	}
@@ -125,15 +132,6 @@ LP_RhythmTreeLeaf : LP_Leaf {
 			attachment = spanners.detect { |elem| elem == attachment };
 			if (attachment.notNil) { spanners.remove(attachment) };
 		};
-	}
-	tie {
-		^spanners.detect { |spanner| spanner.isKindOf(LP_Tie) };
-	}
-	isTied {
-		^this.tie.notNil;
-	}
-	detachTie {
-		if (this.isTied) { this.detach(this.tie) };
 	}
 	beatDuration {
 		var parentageRatios;
@@ -287,6 +285,7 @@ LP_Measure : LP_FixedDurationContainer {
 		timeSignature = argTimeSignature;
 		duration = timeSignature.duration;
 	}
+	//!!! move up to LP_Object and inherit
 	addCommand { |command|
 		if (commands.isNil) { commands = OrderedIdentitySet[] };
 		commands = commands.add(command);
@@ -317,14 +316,15 @@ LP_Tuplet : LP_FixedDurationContainer {
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_TieContainer
-- behaves like a leaf
+- invisible to the clients, behaves like a leaf
 --------------------------------------------------------------------------------------------------------------- */
 LP_TieContainer : LP_FixedDurationContainer {
 	*new { |leaf|
 		var preProlatedDurations, children;
 		preProlatedDurations = LP_Duration.partitionNum(leaf.preProlatedDuration);
 		children = preProlatedDurations.collect { |dur| leaf.clone.preProlatedDuration_(dur) };
-		LP_ContiguousSelection(children).attach(LP_Tie());
+		children.drop(-1).do { |child| child.isTiedToNext_(true) };
+		//LP_ContiguousSelection(children).attach(LP_Tie());
 		^super.new(leaf.preProlatedDuration, children);
 	}
 	clone {
@@ -357,12 +357,6 @@ LP_TieContainer : LP_FixedDurationContainer {
 	}
 	note {
 		^children[0].note;
-	}
-	dynamic_ { |dynamic|
-		children.do { |child| child.dynamic_(dynamic) };
-	}
-	dynamic {
-		^children[0].dynamic;
 	}
 	beatDuration {
 		var parentageRatios;

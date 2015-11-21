@@ -42,6 +42,7 @@ LP_Node {
 	do { |func|
 		func.(this);
 	}
+	update {} // implemented by subclass
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_Container
@@ -73,9 +74,11 @@ LP_Container : LP_Node {
 	}
 	removeAt { |index|
 		children.removeAt(index);
+		this.update;
 	}
 	remove { |node|
 		children.remove(node);
+		this.update;
 	}
 	removeAll { |nodes|
 		nodes.do { |node| this.remove(node) };
@@ -83,6 +86,7 @@ LP_Container : LP_Node {
 	append { |newNode|
 		children = children.add(newNode);
 		newNode.addParent(this);
+		this.update;
 	}
 	appendAll { |newNodes|
 		newNodes.do { |node| this.append(node) };
@@ -90,6 +94,7 @@ LP_Container : LP_Node {
 	insert { |index, newNode|
 		children = children.insert(index, newNode);
 		newNode.addParent(this);
+		this.update;
 	}
 	insertAll { |index, newNodes|
 		newNodes.do { |node, i|
@@ -100,6 +105,7 @@ LP_Container : LP_Node {
 	put { |index, newNode|
 		children = children.put(index, newNode);
 		newNode.addParent(this);
+		this.update;
 	}
 	putAll { |index, newNodes|
 		children.removeAt(index);

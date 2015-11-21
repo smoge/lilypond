@@ -16,7 +16,13 @@
 	}
 	formatStr2 { |str, inStr|
 		str = str ++ "\n";
-		if (this.depth.notNil) { (this.depth + 2).do { str = str ++ "\t" } };
+		if (this.depth.notNil) {
+			if (this.parent.isKindOf(LP_TieContainer)) {
+				(this.depth + 1).do { str = str ++ "\t" };
+			} {
+				(this.depth + 2).do { str = str ++ "\t" };
+			};
+		};
 		str = str ++ inStr;
 		^str;
 	}
@@ -75,6 +81,9 @@
 		indicator and spanner strings
 		override end strings
 		-------------------------------------------------------------------------------- */
+		//!!! new
+		if (this.isTiedToNext) { str = str + "~" };
+
 		markups.do { |markup| str = str + markup.lpStr(indent: this.depth + 2) };
 
 		indicators.do { |indicator|
@@ -164,6 +173,14 @@
 + LP_Tuplet {
 	lpStr {
 		^this.formatStr;
+	}
+}
+
++ LP_TieContainer {
+	lpStr {
+		var str="";
+		children.do { |child| str = str ++ child.lpStr };
+		^str;
 	}
 }
 
