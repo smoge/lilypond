@@ -13,10 +13,14 @@ LP_Config {
 	}
 	*version {
 		var str;
+		if (this.binExists.not) { ^error("Lilypond binary not found at" + this.bin) };
 		^version ?? {
 			str = (LP_Config.bin + "--version").unixCmdGetStdOut;
 			str.copyRange(*[str.findRegexp("\\s[0-9]")[0][0]+1, str.find("\n")-1]);
 		};
+	}
+	*binExists {
+		^File.exists(this.bin);
 	}
 }
 
@@ -57,6 +61,8 @@ LP_File {
 		path = argPath ?? { String.nextDateStampedPathname(LP_Config.dir, "ly") };
 		# paper, orientation = defaultPaperSize.collect { |each| each.asString };
 		this.initDefaults;
+
+		if (LP_Config.binExists.not) { ^error("Lilypond binary not found at" + LP_Config.bin) };
 
 		File.use(path, "w", { |file|
 			file.write("%" + Date.getDate.format("%Y-%m-%d %H:%M")).write("\n\n"); // date stamp

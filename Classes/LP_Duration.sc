@@ -19,6 +19,7 @@ LP_Duration(3, 8).div(10).pair; //!!!
 LP_Duration(3, 8).mul(2).pair;
 LP_Duration(3, 8).mul(1.5).pair; //!!!
 
+// rename partition ??
 LP_Duration(3, 8).split([1, 2]).collect { |e| e.pair };
 LP_Duration(3, 8).split([2, 4]).collect { |e| e.pair };
 LP_Duration(3, 8).split([1, 1, 1, 1]).collect { |e| e.pair };
@@ -29,14 +30,15 @@ LP_Duration(4, 16).isAssignable;
 LP_Duration(4, 12).isAssignable;
  ---------------------------------------------------------------------------------------------------------------*/
 LP_Duration {
-	classvar <base, <dot1, <dot2, <dotted, <nonPartitioned, <partitioned;
+	classvar <base, <dot1, <dot2, <dot3, <dotted, <nonPartitioned, <partitioned;
 	var <numerator, <denominator, <pair;
 
 	//!!! remove and update to use isAssignable
 	*initClass {
 		base = Array.geom(8, 1, 2); // base values: no dots
-		dot1 = Array.geom(6, 3, 2); // 1 dot
-		dot2 = Array.geom(5, 7, 2); // 2 dots
+		dot1 = (base * 3); // 1 dot
+		dot2 = ((dot1 * 2) + base); // 2 dots
+		dot3 = ((dot2 * 2) + base); // 3 dots
 		dotted = [dot1, dot2].reduce(\union).sort;
 		nonPartitioned = [base, dot1, dot2].reduce(\union).sort;
 		partitioned = (1..128).symmetricDifference(nonPartitioned);
@@ -70,6 +72,7 @@ LP_Duration {
 		{ base.includes(numerator) } { 0 }
 		{ dot1.includes(numerator) } { 1 }
 		{ dot2.includes(numerator) } { 2 }
+		{ dot3.includes(numerator) } { 3 }
 		{ partitioned.includes(numerator) } { nil };
 	}
 	isDotted {

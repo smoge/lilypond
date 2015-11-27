@@ -36,27 +36,27 @@ LP_Spanner : LP_Object {
 }
 
 LP_Beam : LP_Spanner {
-	var <startToken="[", <endToken="]", <lyObj="Beam";
+	var <startToken="[", <endToken="]", <lpObj="Beam";
 }
 
 LP_Crescendo : LP_Spanner {
-	var <startToken="\\<", <endToken="\\!", <lyObj="Hairpin";
+	var <startToken="\\<", <endToken="\\!", <lpObj="Hairpin";
 }
 
 LP_Diminuendo : LP_Spanner {
-	var <startToken="\\>", <endToken="\\!", <lyObj="Hairpin";
+	var <startToken="\\>", <endToken="\\!", <lpObj="Hairpin";
 }
 
 //!!! TODO
 LP_GlissandoSkip : LP_Spanner {
-	var <startToken="\\glissando \\glissandoSkipOn>", <endToken="\\glissandoSkipOff", <lyObj="Glissando";
+	var <startToken="\\glissando \\glissandoSkipOn>", <endToken="\\glissandoSkipOff", <lpObj="Glissando";
 	posStr { |position|
 		^switch(position, \above, "^", \below, "_", nil, "");
 	}
 }
 
 LP_Hairpin : LP_Spanner {
-	var descriptor, <startToken, <endToken, <lyObj="Hairpin";
+	var descriptor, <startToken, <endToken, <lpObj="Hairpin";
 	*new { |descriptor, position, xoffset, yoffset|
 		^super.new.init1(descriptor, position, xoffset, yoffset);
 	}
@@ -94,7 +94,7 @@ LP_CircledTipHairpin : LP_Hairpin {
 	}
 }
 
-//!!! lyObj needed: Staff ??
+//!!! lpObj needed: Staff ??
 LP_HiddenStaff : LP_Spanner {
 	var <startToken="\\stopStaff", <endToken="\\startStaff";
 	posStr { |position|
@@ -106,7 +106,7 @@ LP_HiddenStaff : LP_Spanner {
 //!!! new superclass needed
 //!!! argument for octave offset must also be added
 LP_OttavaBracket : LP_Spanner {
-	var <startToken="\\ottava #1", <endToken="\\ottava #0", <lyObj="OttavaBracket";
+	var <startToken="\\ottava #1", <endToken="\\ottava #0", <lpObj="OttavaBracket";
 	posStr { |position|
 		^switch(position, \above, "^", \below, "_", nil, "");
 	}
@@ -117,7 +117,7 @@ LP_OttavaBracket : LP_Spanner {
 // see: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-asymmetric-slurs"
 // dotted and dashed slurs: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-changing-the-appearance-of-a-slur-from-solid-to-dotted-or-dashed"
 LP_PhrasingSlur : LP_Spanner {
-	var <startToken="\\(", <endToken="\\)", <lyObj="PhrasingSlur";
+	var <startToken="\\(", <endToken="\\)", <lpObj="PhrasingSlur";
 }
 
 //!!! add vertical position and asymmetry (eccentricity) arguments
@@ -125,23 +125,23 @@ LP_PhrasingSlur : LP_Spanner {
 // see: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-asymmetric-slurs"
 // dotted and dashed slurs: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-changing-the-appearance-of-a-slur-from-solid-to-dotted-or-dashed"
 LP_Slur : LP_Spanner {
-	var <startToken="(", <endToken=")", <lyObj="Slur";
+	var <startToken="(", <endToken=")", <lpObj="Slur";
 }
 
 //!!! add style argument ??
 //!!! \set Staff.pedalSustainStyle = #'mixed
 //!!! \set Staff.pedalSustainStyle = #'bracket
-//!!! also lyObj: SustainPedalLineSpanner
+//!!! also lpObj: SustainPedalLineSpanner
 LP_SustainPedal : LP_Spanner {
-	var <startToken="\\sustainOn", <endToken="\\sustainOff", <lyObj="SustainPedal";
+	var <startToken="\\sustainOn", <endToken="\\sustainOff", <lpObj="SustainPedal";
 	posStr { |position|
 		^switch(position, \above, "^", \below, "_", nil, "");
 	}
 }
 
-//!!! also lyObj: SostenutoPedalLineSpanner
+//!!! also lpObj: SostenutoPedalLineSpanner
 LP_SostenutoPedal : LP_Spanner {
-	var <startToken="\\sostenutoOn", <endToken="\\sostenutoOff", <lyObj="SostenutoPedal";
+	var <startToken="\\sostenutoOn", <endToken="\\sostenutoOff", <lpObj="SostenutoPedal";
 	posStr { |position|
 		^switch(position, \above, "^", \below, "_", nil, "");
 	}
@@ -155,13 +155,13 @@ LP_SostenutoPedal : LP_Spanner {
 \stopStaff
 \startStaff
 */
-//!!! lyObj needed
+//!!! lpObj needed
 LP_StaffLinesSpanner : LP_Spanner {
 }
 
 //!!! add overrides for LP_Markup text
 LP_TextSpanner : LP_Spanner {
-	var <startToken="\\startTextSpan", <endToken="\\stopTextSpan", <lyObj="TextSpanner";
+	var <startToken="\\startTextSpan", <endToken="\\stopTextSpan", <lpObj="TextSpanner";
 	//!!! HACK
 	posStr { |position|
 		^switch(position, \above, "^", \below, "_", nil, "");
@@ -170,7 +170,7 @@ LP_TextSpanner : LP_Spanner {
 
 //!!! TODO: see http://abjad.mbrsi.org/api/tools/spannertools/TrillSpanner.html?highlight=trillspanner
 LP_TrillSpanner : LP_Spanner {
-	var <startToken="\\startTrillSpan", <endToken="\\stopTrillSpan", <lyObj="TrillSpanner";
+	var <startToken="\\startTrillSpan", <endToken="\\stopTrillSpan", <lpObj="TrillSpanner";
 	//!!! HACK
 	posStr { |position|
 		^switch(position, \above, "^", \below, "_", nil, "");
@@ -191,12 +191,12 @@ LP_ComplexSpanner : LP_Spanner {
 }
 
 LP_Glissando : LP_ComplexSpanner {
-	var <token="\\glissando", <lyObj="Glissando";
+	var <token="\\glissando", <lpObj="Glissando";
 }
 
 //!!! TODO: must prevent attaching more than one LP_Tie to the same leaf
 //!!! TODO: must also prevent adding more than one LP_Tie to the leaf's spanners collection (instance variable)
 //!!! TODO: only allow tie if all leaves in the selection are non-rests and have the same note/s
 LP_Tie : LP_ComplexSpanner {
-	var <token="~", <lyObj="Tie";
+	var <token="~", <lpObj="Tie";
 }

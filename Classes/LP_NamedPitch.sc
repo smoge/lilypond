@@ -24,12 +24,18 @@ x.noteName;
 x = LP_NamedPitch('Db-6');
 x.note;
 x.noteName;
+
+x = LP_NamedChord(["cs'", 'D4', 63]);
+x.notes;
+x.noteNames;
 --------------------------------------------------------------------------------------------------------------- */
 LP_NamedPitch {
 	var <note, <noteName;
 	*new { |pitch|
 		^if (pitch.isString || pitch.isKindOf(Symbol)) {
-			if (pitch.asString.findRegexp("[0-9]").notEmpty) { this.newBySCStr(pitch) } { this.newByLPStr(pitch) }
+			if (pitch.asString.findRegexp("[0-9]").notEmpty) {
+				this.newByMidiNoteName(pitch);
+			} { this.newByLPStr(pitch) }
 		} { this.newByMidinote(pitch) };
 	}
 	*newByMidinote { |note|
@@ -38,10 +44,9 @@ LP_NamedPitch {
 	*newByLPStr { |str|
 		^super.new.init(LP_NoteLib.[str.asSymbol], str.asString);
 	}
-	*newBySCStr { |str|
+	*newByMidiNoteName { |str|
 		str = LP_NamedPitchParser(str);
 		^super.new.init(LP_NoteLib.[str.asSymbol], str.asString);
-
 	}
 	init { |argNote, argNoteName|
 		note = argNote;
@@ -49,6 +54,19 @@ LP_NamedPitch {
 	}
 	asLP_Note { |note|
 		^LP_Note(note);
+	}
+}
+
+LP_NamedChord {
+	var <notes, <noteNames;
+	*new { |array|
+		^super.new.init(array);
+	}
+	init { |array|
+		var namedPitches;
+		namedPitches = array.collect { |note| LP_NamedPitch(note) };
+		notes = namedPitches.collect { |each| each.note };
+		noteNames = namedPitches.collect { |each| each.noteName };
 	}
 }
 
@@ -67,7 +85,7 @@ LP_NamedPitchParser {
 		};
 
 		dict = (
-			/* dutch
+			/* // dutch
 			'#': "is", '##': "isis", '+': "ih", '#+': "isih", 'b': "es", 'bb': "eses", '-': "eh", 'b-': "eseh",
 			*/
 			'#': "s", '##': "ss", '+': "qs", '#+': "tqs", 'b': "f", 'bb': "ff", '-': "qf", 'b-': "tqf",
@@ -112,7 +130,7 @@ LP_NoteHead {
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_StringParser
-- used in LP_Measure initialisation and by LP_Selection::replaceNotes
+- used in LP_Measure initialisation and by LP_Selection::notes_
 - tokens must be separated by spaces
 
 LP_StringParser("ef' <c' eqs' gs' bf'>").printAll; ""
@@ -179,7 +197,7 @@ LP_NoteLib {
 		modifiers = #["ff", "tqf", "f", "qf", "", "qs", "s", "tqs", "ss"];
 		modifierOffset = (-2, -1.5 .. 2);
 
-		/* dutch: eighth-tones
+		/* // dutch: including eighth-tones
 		modifiers = #["eses","esqq","eseh","eseq","es","esiq","eh","eq","","iq","ih","iseq","is",
 			"isiq","isih","isqq","isis"];
 		modifierOffset = (-2, -1.75 .. 2);

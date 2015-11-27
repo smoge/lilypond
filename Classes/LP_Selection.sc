@@ -8,7 +8,7 @@ LP_Selection {
 	}
 	init { |argComponents|
 		components = argComponents;
-		components.do { |component| this.addDependant(component.root) }; // root is each LP_Measure in the selection
+		//components.do { |component| this.addDependant(component.root) }; // root is each LP_Measure in the selection
 	}
 	selectBy { |class|
 		components = if (class.isArray) {
@@ -37,12 +37,22 @@ LP_Selection {
 					components = components.select { |node| node.isKindOf(LP_Measure) }.asArray;
 				},
 				//!!! rework to hold LP_Events (see LP_TieSelection below)
+				/*
+				m = [1, 2, 1];
+				a = LP_Staff(LP_Measure([4, 4], [3, 5]) ! 2);
+				a.nodes.printAll;
+				a.selectBy(LP_Event).components;
+				*/
 				LP_Event, {
 					var elems;
 					elems = this.selectBy(LP_Leaf).components;
 					elems = elems.separate { |leaf| leaf.isTiedToNext.not };
 					elems = elems.collect { |elem|
 						if (elem[0].isTiedToNext) { LP_TieSelection(elem) } { elem };
+						/*case
+						{ elem[0].parent.isKindOf(LP_TieContainer) } { elem[0].parent }
+						{ elem[0].isTiedToNext } { LP_TieSelection(elem) }
+						{ elem }*/
 					}.flat;
 					components = elems;
 				},
@@ -67,7 +77,8 @@ LP_Selection {
 					elems = this.selectBy(LP_Event).components;
 					elems = elems.separate { |a, b| a.isKindOf(LP_Rest) || b.isKindOf(LP_Rest) };
 					elems = elems.reject { |elem| elem[0].isKindOf(LP_Rest) };
-					elems = elems.collect { |elem| LP_ContiguousSelection(elem) };
+					//elems = elems.collect { |elem| LP_ContiguousSelection(elem) };
+					elems = elems.collect { |elem| LP_Selection(elem) };
 					^LP_SelectionInventory(elems);
 				}
 			);
@@ -75,10 +86,6 @@ LP_Selection {
 	}
 	attach { |attachment|
 		if (attachment.isKindOf(LP_Spanner)) {
-			/*if (attachment.isKindOf(LP_Tie)) {
-				components.drop(-1).do { |each| each.isTiedToNext_(true) };
-				components[1..].do { |each| each.isTiedToPrev_(true) };
-			};*/
 			components.do { |each| each.attach(attachment) };
 			attachment.components_(components);
 		} {
@@ -179,21 +186,9 @@ LP_Selection {
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
-• LP_ContiguousSelection
---------------------------------------------------------------------------------------------------------------- */
-LP_ContiguousSelection : LP_Selection {
-	attach { |attachment|
-		/*if (attachment.isKindOf(LP_Tie)) {
-			components.drop(-1).do { |each| each.isTiedToNext_(true) };
-			components[1..].do { |each| each.isTiedToPrev_(true) };
-		};*/
-		components.do { |each| each.attach(attachment) };
-		attachment.components_(components);
-	}
-}
-/* ---------------------------------------------------------------------------------------------------------------
 • LP_TieSelection
 !!TODO
+- inherit from LP_ContiguousSelection ??
 - rename LP_Event
 - include single leaves (not just tied leaves) in each event (same as LogicalTie in Abjad)
 --------------------------------------------------------------------------------------------------------------- */
@@ -201,11 +196,6 @@ LP_TieSelection : LP_ContiguousSelection {
 	*new { |components|
 		^super.new(components);
 	}
-	/* !! REMOVE
-	isTied {
-		^true;
-	}
-	*/
 	isTiedToNext {
 		^components.last.isTiedToNext;
 	}
@@ -250,24 +240,19 @@ LP_TieSelection : LP_ContiguousSelection {
 		components[0].preProlatedDuration_(dur);
 		if (this.size > 1) { LP_Selection(components[1..]).remove };
 	}
-	note_ { |note|
-		this.replaceNotes(note ! this.size);
-	}
+	//!!! support for LP_Chords in selection ??
 	note {
 		^components[0].note;
 	}
-	notes_ { |notes|
-		components.do { |component| component.notes_(notes) };
-	}
-	dynamic {
+	/*dynamic {
 		^components[0].dynamic;
-	}
+	}*/
 	detachTie {
 		if (this.size == 1) { ^components[0].detachTie };
 	}
-	// for use in LP_Player
+	// for use in LP_Player and some mutation methods
 	type {
-		^components[0].class;
+		^components[0].type;
 	}
 }
 
@@ -303,6 +288,11 @@ LP_SelectionInventory {
 	doesNotUnderstand { |selector ... args|
 		selections.do { |selection| selection.perform(selector, *args) };
 	}
+}
+/* ---------------------------------------------------------------------------------------------------------------
+• TODO: LP_ContiguousSelection
+--------------------------------------------------------------------------------------------------------------- */
+LP_ContiguousSelection : LP_Selection {
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • TODO: LP_SliceSelection

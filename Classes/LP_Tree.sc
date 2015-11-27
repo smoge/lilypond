@@ -74,11 +74,11 @@ LP_Container : LP_Node {
 	}
 	removeAt { |index|
 		children.removeAt(index);
-		this.update;
+		this.root.update;
 	}
 	remove { |node|
 		children.remove(node);
-		this.update;
+		this.root.update;
 	}
 	removeAll { |nodes|
 		nodes.do { |node| this.remove(node) };
@@ -86,26 +86,33 @@ LP_Container : LP_Node {
 	append { |newNode|
 		children = children.add(newNode);
 		newNode.addParent(this);
-		this.update;
+		this.root.update;
 	}
 	appendAll { |newNodes|
-		newNodes.do { |node| this.append(node) };
+		newNodes.do { |node, i|
+			children = children.add(node);
+			node.addParent(this);
+		};
+		this.root.update;
+		// newNodes.do { |node| this.append(node) };
 	}
 	insert { |index, newNode|
 		children = children.insert(index, newNode);
 		newNode.addParent(this);
-		this.update;
+		this.root.update;
 	}
 	insertAll { |index, newNodes|
 		newNodes.do { |node, i|
 			children = children.insert(index + i, node);
 			node.addParent(this);
 		};
+		this.root.update;
+		// newNodes.do { |node, i| this.insert(index + i, node) };
 	}
 	put { |index, newNode|
 		children = children.put(index, newNode);
 		newNode.addParent(this);
-		this.update;
+		this.root.update;
 	}
 	putAll { |index, newNodes|
 		children.removeAt(index);
@@ -113,6 +120,7 @@ LP_Container : LP_Node {
 			children = children.insert(index + i, node);
 			node.addParent(this);
 		};
+		this.root.update;
 	}
 	replace { |oldNode, newNode|
 		var index;

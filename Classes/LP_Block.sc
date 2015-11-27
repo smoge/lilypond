@@ -164,7 +164,7 @@ LP_PaperBlock : LP_Block {
 • LP_HeaderBlock
 --------------------------------------------------------------------------------------------------------------- */
 LP_HeaderBlock : LP_Block {
-	var <dedication, <title, <subtitle, <subsubtitle, <instrument, <poet, <composer;
+	var <dedication, <title, <piece, <subtitle, <subsubtitle, <instrument, <poet, <composer;
 	var <meter, <arranger, <tagline, <copyright;
 	*new {
 		^super.new('header');
@@ -182,6 +182,10 @@ LP_HeaderBlock : LP_Block {
 	title_ { |argTitle|
 		title = argTitle;
 		this.add('title', title);
+	}
+	piece_ { |argPiece|
+		piece = argPiece;
+		this.add('piece', piece);
 	}
 	subtitle_ { |argSubtitle|
 		subtitle = argSubtitle;

@@ -195,20 +195,20 @@ LP_File(LP_Score([staff1, staff2])).write;
 • selections of music can be mutated
 ---------------------------------------------------------------------------------------------------------------------- */
 (
-// replaceNotes 1
+// notes_
 var staff1, staff2;
 staff1 = LP_Staff(LP_Measure([4, 4], 1!8) ! 4);
 staff2 = staff1.deepCopy;
-staff2.selectBy(LP_PitchEvent).replaceNotes((60, 61 .. 100));
+staff2.selectBy(LP_PitchEvent).notes_((60, 61 .. 100));
 LP_File(LP_Score([staff1, staff2])).write;
 )
 
 (
-// replaceNotes 2
+// notes_
 var staff1, staff2;
 staff1 = LP_Staff(LP_Measure([4, 4], 1!8) ! 4);
 staff2 = staff1.deepCopy;
-staff2.selectBy(LP_PitchEvent).replaceNotes("A0 C#1 Db2 C##3 E4 B4 Bbb5 C6");
+staff2.selectBy(LP_PitchEvent).notes_("A0 C#1 Db2 C##3 E4 B4 Bbb5 C6");
 LP_File(LP_Score([staff1, staff2])).write;
 )
 
@@ -226,18 +226,18 @@ LP_File(LP_Score([staff1, staff2])).write;
 // fuse
 var staff1, staff2;
 staff1 = LP_Staff(LP_Measure([4, 4], 1!8) ! 2);
+staff1.notes_((60, 61 .. staff1.leaves.lastIndex + 60));
 staff2 = staff1.deepCopy;
-staff2.selectBy(LP_PitchEvent).replaceNotes((60, 61 .. staff2.leaves.lastIndex + 60));
-staff2.selectBy(LP_PitchEvent)[3..11].fuse;
+staff2.selectBy(LP_PitchEvent)[3..10].fuse;
 LP_File(LP_Score([staff1, staff2])).write;
 )
 
 (
-// mask (nb: this is still a little buggy!)
+// mask
 var staff1, staff2;
 staff1 = LP_Staff(LP_Measure([4, 4], 1!8) ! 4);
+staff1.selectBy(LP_PitchEvent).notes_((60, 61 .. staff1.leaves.lastIndex + 60));
 staff2 = staff1.deepCopy;
-staff2.selectBy(LP_PitchEvent).replaceNotes((60, 61 .. staff2.leaves.lastIndex + 60));
 staff2.selectBy(LP_PitchEvent).mask([3,7,-9,2,1,1,5,-4]);
 LP_File(LP_Score([staff1, staff2])).write;
 )
@@ -248,6 +248,15 @@ var staff1, staff2;
 staff1 = LP_Staff([LP_Measure([4, 4], 1!8)]);
 staff2 = staff1.deepCopy;
 staff2.selectBy(LP_PitchEvent)[2].partition([-2,3]);
+LP_File(LP_Score([staff1, staff2])).write;
+)
+
+(
+// partition
+var staff1, staff2;
+staff1 = LP_Staff([LP_Measure([4, 4], 1!8)]);
+staff2 = staff1.deepCopy;
+staff2.selectBy(LP_PitchEvent).do { |each| LP_Selection([each]).partition([-2,3]) };
 LP_File(LP_Score([staff1, staff2])).write;
 )
 /* ----------------------------------------------------------------------------------------------------------------------

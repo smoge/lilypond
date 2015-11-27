@@ -3,6 +3,7 @@
 --------------------------------------------------------------------------------------------------------------- */
 LP_Object {
 	var <overrides, <sets, <functions, <attachments;
+	//!!! remove init1 -- subclasses add properties dynamically when needed
 	init1 { // called by subclass init method
 		overrides = OrderedIdentitySet[];
 		sets = OrderedIdentitySet[];
@@ -10,19 +11,27 @@ LP_Object {
 		attachments = [];
 	}
 	override { |property, value|
+		if (overrides.isNil) { overrides = OrderedIdentitySet[] };
 		overrides = overrides.add(property -> value);
 	}
 	set { |property, value|
+		if (sets.isNil) { sets = OrderedIdentitySet[] };
 		sets = sets.add(property -> value);
 	}
 	addFunction { |funcName, args|
+		if (functions.isNil) { functions = OrderedIdentitySet[] };
 		functions = functions.add(funcName -> args);
 	}
 	attach { |attachment|
+		if (attachments.isNil) { attachments = [] };
 		attachments = attachments.add(attachment);
 	}
 	style_ { |className|
 		className.new(this);
+	}
+	// always create a new instance of the copied object
+	copy {
+		^this.deepCopy;
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
@@ -34,13 +43,12 @@ LP_Object {
 - alternatively, LP_Score should have a LP_ContextBlock, which implements the overrides
 --------------------------------------------------------------------------------------------------------------- */
 LP_Score : LP_Object {
-	var <staves, <lyObj="Score";
+	var <staves, <lpObj="Score";
 	*new { |staves|
 		^super.new.init(staves);
 	}
 	init { |argStaves|
 		staves = argStaves;
-		super.init1;
 	}
 	at { |index|
 		^staves[index];
@@ -57,21 +65,14 @@ LP_Score : LP_Object {
 - children: LP_Voice (TODO), LP_Measure
 --------------------------------------------------------------------------------------------------------------- */
 LP_Staff : LP_Object {
-	var <measures, <lyObj="Staff";
+	var <measures, <lpObj="Staff";
 	var <instrumentName, <shortInstrumentName;
 	*new { |measures|
 		^super.new.init(measures);
 	}
 	init { |argMeasures|
-		measures = argMeasures.as(LinkedList);
+		measures = argMeasures;
 		measures.do { |measure| measure.addParent(this) };
-		this.leaves.do { |leaf, i|
-			if (leaf.isTiedToPrev && leaf.prevLeaf.notNil) {
-				leaf.prevLeaf.isTiedToNext_(true);
-				LP_Selection([leaf.prevLeaf, leaf]).attach(LP_Tie());
-			};
-		};
-		super.init1;
 	}
 	//!!! workaround
 	parent {
@@ -81,9 +82,6 @@ LP_Staff : LP_Object {
 	isTuplet {
 		^false;
 	}
-	/*at { |index|
-		^this.selectBy(LP_Leaf)[index];
-	}*/
 	at { |index|
 		^measures[index];
 	}
@@ -105,11 +103,17 @@ LP_Staff : LP_Object {
 	offsets {
 		^this.selectBy(LP_Event).components.collect { |each| each.beatDuration }.offsets.drop(-1);
 	}
+	// move up to LP_Object (so LP_Meausure and other LP_FixedDurationContainers can inherit)
 	notes {
-		^measures.collect { |measure| measure.notes }.flat;
+		^this.selectBy(LP_PitchEvent).notes;
 	}
+	// move up to LP_Object (so LP_Meausure and other LP_FixedDurationContainers can inherit)
+	noteNames {
+		^this.selectBy(LP_PitchEvent).noteNames;
+	}
+	// move up to LP_Object (so LP_Meausure and other LP_FixedDurationContainers can inherit)
 	notes_ { |notes|
-		LP_Selection(this.leaves).replaceNotes(notes);
+		this.selectBy(LP_PitchEvent).notes_(notes);
 	}
 	attach { |attachment|
 		this.selectBy(LP_Leaf)[0].attach(attachment);

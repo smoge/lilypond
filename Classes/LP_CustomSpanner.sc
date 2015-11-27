@@ -12,7 +12,7 @@ LP_CustomSpanner {
 }
 
 LP_ArrowText : LP_CustomSpanner {
-	var <lyObj="TextSpanner";
+	var <lpObj="TextSpanner";
 	//!!! should arguments be LP_Markups rather than strings ??
 	*new { |leftText, rightText|
 		^super.new.init(leftText, rightText);

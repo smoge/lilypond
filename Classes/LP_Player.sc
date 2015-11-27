@@ -2,11 +2,11 @@
 // play a LP_Score
 a = LP_Staff([LP_Measure([4, 8], [LP_Tuplet(3, [1,1,1]), LP_Tuplet(2, [1,1,1,1,1])])]);
 a.selectBy(LP_Event).mask([2, 3, -1, 2]);
-a.selectBy(LP_PitchEvent).replaceNotes([61, 62, 63, 71]);
+a.selectBy(LP_PitchEvent).notes_([61, 62, 63, 71]);
 b = a.deepCopy;
-b.selectBy(LP_PitchEvent).replaceNotes([63, 61, 62, 64] + 2);
+b.selectBy(LP_PitchEvent).notes_([63, 61, 62, 64] + 2);
 c = a.deepCopy;
-c.selectBy(LP_PitchEvent).replaceNotes([63, 61, 62, 64].reverse + 5);
+c.selectBy(LP_PitchEvent).notes_([63, 61, 62, 64].reverse + 5);
 x = LP_Score([a, b, c]);
 LP_Player(x).playMIDI;
 // LP_Player(x).play;
@@ -14,7 +14,7 @@ LP_Player(x).playMIDI;
 // play a LP_Measure, LP_Voice or LP_Staff
 a = LP_Staff([LP_Measure([4, 8], [LP_Tuplet(3, [1,1,1]), LP_Tuplet(2, [1,1,1,1,1])])]);
 a.selectBy(LP_Event).mask([2, 3, -1, 2]);
-a.selectBy(LP_PitchEvent).replaceNotes([61, 62, 63]);
+a.selectBy(LP_PitchEvent).notes_([61, 62, 63]);
 LP_Player(a).playMIDI;
 
 LP_File(x).write("test1.ly");
@@ -68,8 +68,8 @@ LP_EventList(a).printAll; "";
 
 a = LP_Staff([LP_Measure([4, 8], [LP_Tuplet(3, [1,1,1]), LP_Tuplet(2, [1,1,1,1,1])])]);
 b = a.deepCopy;
-a.selectBy(LP_PitchEvent).replaceNotes((61,61.5..80));
-b.selectBy(LP_PitchEvent).replaceNotes((80,79..40));
+a.selectBy(LP_PitchEvent).notes_((61,61.5..80));
+b.selectBy(LP_PitchEvent).notes_((80,79..40));
 c = LP_Score([a, b]);
 LP_EventList(c).printAll; "";
 --------------------------------------------------------------------------------------------------------------- */

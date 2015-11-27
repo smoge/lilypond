@@ -11,17 +11,17 @@ LP_Style {
 
 NoteHeadsOnly : LP_Style {
 	set {
-		var lyObj;
-		lyObj = context.lyObj;
-		context.override(lyObj ++ ".BarLine.stencil", "##f");
-		context.override(lyObj ++ ".TimeSignature.stencil", "##f");
-		context.override(lyObj ++ ".Stem.stencil", "##f");
-		context.override(lyObj ++ ".Tie.stencil", "##f");
-		context.override(lyObj ++ ".Beam.stencil", "##f");
-		context.override(lyObj ++ ".Flag.stencil", "##f");
-		context.override(lyObj ++ ".Dots.stencil", "##f");
-		context.override(lyObj ++ ".NoteHead.duration-log", "#4");
-		context.override(lyObj ++ ".Rest.transparent", "##t");
+		var lpObj;
+		lpObj = context.lpObj;
+		context.override(lpObj ++ ".BarLine.stencil", "##f");
+		context.override(lpObj ++ ".TimeSignature.stencil", "##f");
+		context.override(lpObj ++ ".Stem.stencil", "##f");
+		context.override(lpObj ++ ".Tie.stencil", "##f");
+		context.override(lpObj ++ ".Beam.stencil", "##f");
+		context.override(lpObj ++ ".Flag.stencil", "##f");
+		context.override(lpObj ++ ".Dots.stencil", "##f");
+		context.override(lpObj ++ ".NoteHead.duration-log", "#4");
+		context.override(lpObj ++ ".Rest.transparent", "##t");
 		// only show first event in ties
 		switch(context.class,
 			LP_Score, { context.staves.do { |staff| this.hideTiedNotes(staff) } },

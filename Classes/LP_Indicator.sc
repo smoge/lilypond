@@ -73,7 +73,7 @@ LP_Indicator : LP_Object {
 }
 
 LP_Dynamic : LP_Indicator {
-	var <lyObj="Dynamic";
+	var <lpObj="Dynamic";
 	lpStr {
 		var xoffsetStr="", yoffsetStr="";
 		//if (xoffset != 0) { xoffsetStr = "\\general-align #X #" ++ xoffset.asString };
@@ -86,7 +86,7 @@ LP_Dynamic : LP_Indicator {
 
 LP_Articulation : LP_Indicator {
 	classvar <articulations;
-	var <lyObj="Articulation";
+	var <lpObj="Articulation";
 	*initClass {
 		articulations = #[
 			'>', '^', '_', '!', '.', '-', '+', 'accent', 'espressivo', 'marcato', 'portato', 'staccatissimo',
@@ -128,7 +128,7 @@ LP_Clef('bass').lpStr;
 LP_Clef('treble^8').lpStr;
 --------------------------------------------------------------------------------------------------------------- */
 LP_Clef : LP_StaffIndicator {
-	var <lyObj="Clef";
+	var <lpObj="Clef";
 	lpStr {
 		string = string.asString;
 		// if name includes non-alpha characters (e.g. treble_8), enclose in quotes
@@ -137,13 +137,13 @@ LP_Clef : LP_StaffIndicator {
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
-• LP_MetronomeMark
-LP_MetronomeMark(LP_Duration(1, 4), 120).lpStr;
-LP_MetronomeMark(LP_Duration(1, 4), 60).tempo;
+• LP_MetronomeMarkq
+LP_MetronomeMark(LP_Duration(3, 8), 60).lpStr;
+LP_MetronomeMark(LP_Duration(1, 4), "120-140").lpStr;
 --------------------------------------------------------------------------------------------------------------- */
 LP_MetronomeMark : LP_StaffIndicator {
 	var <duration, <bpm;
-	var <lyObj="MetronomeMark";
+	var <lpObj="MetronomeMark";
 	*new { |duration, bpm|
 		^super.new.init(duration, bpm)
 	}
@@ -152,9 +152,9 @@ LP_MetronomeMark : LP_StaffIndicator {
 		bpm = argBpm;
 	}
 	// SC tempo
-	tempo {
+	/*tempo {
 		^((bpm / 60) * duration.beatDuration);
-	}
+	}*/
 	lpStr {
 		^("\\tempo" + duration.lpStr + "=" + bpm.asString)
 	}
@@ -165,7 +165,7 @@ LP_RehearsalMark().lpStr;
 LP_RehearsalMark("A").lpStr;
 --------------------------------------------------------------------------------------------------------------- */
 LP_RehearsalMark : LP_StaffIndicator {
-	var <lyObj="RehearsalMark";
+	var <lpObj="RehearsalMark";
 	lpStr {
 		^if (string.isNil) { "\\mark \\default" } { "\\mark" + string.asString.quote };
 	}
@@ -175,7 +175,7 @@ LP_RehearsalMark : LP_StaffIndicator {
 LP_BarLine("|.").lpStr;
 --------------------------------------------------------------------------------------------------------------- */
 LP_BarLine : LP_Indicator {
-	var <lyObj="BarLine";
+	var <lpObj="BarLine";
 	lpStr {
 		^("\\bar" + string.asString.quote );
 	}

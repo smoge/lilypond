@@ -81,9 +81,6 @@
 		indicator and spanner strings
 		override end strings
 		-------------------------------------------------------------------------------- */
-		//!!! new
-		if (this.isTiedToNext) { str = str + "~" };
-
 		markups.do { |markup| str = str + markup.lpStr(indent: this.depth + 2) };
 
 		indicators.do { |indicator|
@@ -116,6 +113,19 @@
 	lpStr {
 		var str = "";
 		str = str ++ this.formatStr(noteName ++ writtenDuration.lpStr);
+		if (isTiedToNext) { str = str + "~" };
+		^str;
+	}
+}
+
+// behaves like a leaf
+//!!! TODO: overrides etc. are being written for every child -- they should only be written once
++ LP_TieContainer {
+	lpStr {
+		var str = "";
+		children.drop(-1).do { |child| child.isTiedToNext_(true) };
+		children.do { |child| str = str ++ child.lpStr };
+		if (isTiedToNext) { str = str + "~" };
 		^str;
 	}
 }
@@ -124,6 +134,7 @@
 	lpStr {
 		var str = "";
 		str = str ++ this.formatStr("<" ++ noteNames.reduce('+') ++ ">" ++ writtenDuration.lpStr);
+		if (isTiedToNext) { str = str + "~" };
 		^str;
 	}
 }
@@ -132,7 +143,6 @@
 	lpStr {
 		var str = "";
 		str = str ++ this.formatStr("r" ++ duration.lpStr);
-		str = str.replace("~", ""); // temporary hack for removing tie token
 		^str;
 	}
 }
@@ -149,11 +159,12 @@
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
-• LP_RhythmTreeContainer
+• LP_FixedDurationContainer
 --------------------------------------------------------------------------------------------------------------- */
-+ LP_RhythmTreeContainer {
++ LP_FixedDurationContainer {
 	formatStr {
 		var str="";
+		// this hook must stay in the superclass: isTuplet can be true for LP_Measure
 		if (isTuplet) {
 			if (this.depth > 0) { str = str ++ "\n" };
 			(this.depth + 2).do { str = str ++ "\t" };
@@ -176,22 +187,17 @@
 	}
 }
 
-+ LP_TieContainer {
-	lpStr {
-		var str="";
-		children.do { |child| str = str ++ child.lpStr };
-		^str;
-	}
-}
-
 + LP_Measure {
 	lpStr {
 		var str;
 		if (this.prevMeasure.isNil || { this.prevMeasure.timeSignature.pair != timeSignature.pair }) {
-			str = "\t\t\\time " ++ timeSignature.lpStr ++ "\n";
+			str = "\t\t\\time " ++ timeSignature.lpStr;
 		};
-		commands.do { |command| str = str ++ "\n\t\t\\" ++ command.asString + "\n" };
-		str = str ++ this.formatStr ++ "\n";
+		commands.do { |command| str = str ++ "\n\t\t\\" ++ command.asString  };
+		overrides.do { |assoc| str = str ++ "\n\t\\override" + assoc.key + "=" + assoc.value.asString };
+		indicatorsAtHead.do { |indicator| str = str ++ "\n\t\t" ++ indicator.lpStr };
+		str = str ++ "\n" ++ this.formatStr;
+		indicatorsAtTail.do { |indicator| str = str ++ "\n\t\t" ++ indicator.lpStr };
 		^str;
 	}
 }
