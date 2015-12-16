@@ -1,40 +1,4 @@
 /* ---------------------------------------------------------------------------------------------------------------
-• LP_Object
---------------------------------------------------------------------------------------------------------------- */
-LP_Object {
-	var <overrides, <sets, <functions, <attachments;
-	//!!! remove init1 -- subclasses add properties dynamically when needed
-	init1 { // called by subclass init method
-		overrides = OrderedIdentitySet[];
-		sets = OrderedIdentitySet[];
-		functions = OrderedIdentitySet[];
-		attachments = [];
-	}
-	override { |property, value|
-		if (overrides.isNil) { overrides = OrderedIdentitySet[] };
-		overrides = overrides.add(property -> value);
-	}
-	set { |property, value|
-		if (sets.isNil) { sets = OrderedIdentitySet[] };
-		sets = sets.add(property -> value);
-	}
-	addFunction { |funcName, args|
-		if (functions.isNil) { functions = OrderedIdentitySet[] };
-		functions = functions.add(funcName -> args);
-	}
-	attach { |attachment|
-		if (attachments.isNil) { attachments = [] };
-		attachments = attachments.add(attachment);
-	}
-	style_ { |className|
-		className.new(this);
-	}
-	// always create a new instance of the copied object
-	copy {
-		^this.deepCopy;
-	}
-}
-/* ---------------------------------------------------------------------------------------------------------------
 • LP_Score
 – children: LP_StaffGroup (TODO), LP_Staff
 
@@ -49,15 +13,25 @@ LP_Score : LP_Object {
 	}
 	init { |argStaves|
 		staves = argStaves;
+		this.initDefaults;
+	}
+	initDefaults {
+		this.numericTimeSignatures_(true);
+		this.showTupletRatios_(true);
+		this.tupletFullLength_(true);
 	}
 	at { |index|
 		^staves[index];
 	}
+	depth {
+		^1;
+	}
 	proportionalNotationDuration_ { |lp_Duration, strict=false|
 		var schemeMoment;
 		schemeMoment = "".catList(lp_Duration.pair.insert(1, "/"));
-		this.set('Score.proportionalNotationDuration', "#(ly:make-moment" + schemeMoment ++ ")");
-		this.override('Score.SpacingSpanner.strict-note-spacing', if (strict) { "##t" } { "##f" });
+		this.set(\proportionalNotationDuration,
+			LP_Set("Score.proportionalNotationDuration = #(ly:make-moment" + schemeMoment ++ ")"));
+		this.override(\strictNoteSpacing, LP_Override("Score.SpacingSpanner.strict-note-spacing =" + strict.lpStr));
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
@@ -84,6 +58,9 @@ LP_Staff : LP_Object {
 	}
 	at { |index|
 		^measures[index];
+	}
+	depth {
+		^2;
 	}
 	nodes {
 		^measures.collect { |measure| measure.nodes }.flat;
@@ -120,14 +97,22 @@ LP_Staff : LP_Object {
 	}
 	instrumentName_ { |name|
 		instrumentName = name;
-		this.set('Staff.instrumentName', "#\"" ++ name.asString + "\"");
+		this.set(\instrumentName, LP_Set("Staff.instrumentName = #\"" ++ name.asString + "\""));
 	}
 	shortInstrumentName_ { |name|
 		shortInstrumentName = name;
-		this.set('Staff.shortInstrumentName', "#\"" ++ name.asString + "\"");
+		this.set(\shortInstrumentName, LP_Set("Staff.shortInstrumentName = #\"" ++ name.asString + "\""));
 	}
+	/*
+	http://www.lilypond.org/doc/v2.19/Documentation/notation/displaying-pitches#automatic-accidentals
+	default, voice, modern, modern-cautionary, modern-voice, modern-voice-cautionary, piano, piano-cautionary
+	neo-modern, neo-modern-cautionary, neo-modern-voice, neo-modern-voice-cautionary, dodecaphonic,
+	dodecaphonic-no-repeat, dodecaphonic-first, teaching, no-reset, forget
+
+	\accidentalStyle modern
+	*/
 	accidentalStyle_ { |name|
-		this.addFunction('accidentalStyle', name);
+		this.functionCall(LP_FunctionCall(\accidentalStyle, name.asString));
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------

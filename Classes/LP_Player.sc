@@ -15,25 +15,46 @@ LP_Player(x).playMIDI;
 a = LP_Staff([LP_Measure([4, 8], [LP_Tuplet(3, [1,1,1]), LP_Tuplet(2, [1,1,1,1,1])])]);
 a.selectBy(LP_Event).mask([2, 3, -1, 2]);
 a.selectBy(LP_PitchEvent).notes_([61, 62, 63]);
-LP_Player(a).playMIDI;
+LP_Player(a).play;
 
 LP_File(x).write("test1.ly");
 --------------------------------------------------------------------------------------------------------------- */
-LP_Player {
-	var <eventList;
-	*new { |music|
-		^super.new.init(music);
+LP_Instrument {
+	var <name, <isMono;
+	*new { |name, isMono=false|
+		^super.new.init(name, isMono)
 	}
-	init { |music|
+	init { |argName, argIsMono|
+		name = argName.asSymbol;
+		isMono = argIsMono;
+	}
+}
+
+LP_Player {
+	var <eventList, <instruments;
+	*new { |music, instruments|
+		^super.new.init(music, instruments);
+	}
+	init { |music, argInstruments|
 		eventList = LP_EventList(music);
+		instruments = argInstruments;
 	}
 	// array of patterns where each item = an independent voice
 	//!!! move this to LP_EventList::asPattern method ?
 	patterns {
-		var durs, type, midinotes;
-		^eventList.collect { |voice|
+		var durs, type, midinotes, instrument;
+		^eventList.collect { |voice, i|
 			# durs, type, midinotes = voice.flop;
-			Pbind(\dur, Pseq(durs), \midinote, Pseq(midinotes));
+			if (instruments.notNil) {
+				instrument = instruments[i];
+				is (instrument.isMono) {
+					Pmono(instrument.name, \dur, Pseq(durs), \midinote, Pseq(midinotes));
+				} {
+					Pbind(\instrument, instrument.name, \dur, Pseq(durs), \midinote, Pseq(midinotes));
+				};
+			} {
+				Pbind(\dur, Pseq(durs), \midinote, Pseq(midinotes));
+			};
 		};
 	}
 	play {
@@ -41,7 +62,10 @@ LP_Player {
 		//!!! also settable tempo ??
 		Ppar(this.patterns).play;
 	}
-	playMIDI {
+}
+
+LP_MIDIPlayer : LP_Player {
+	play {
 		var device="IAC Driver", port="IAC Bus 1", midiOut, voices;
 
 		if (MIDIClient.initialized == false) { MIDIClient.init };

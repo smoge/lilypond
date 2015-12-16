@@ -2,6 +2,8 @@
 • LP_CustomSpanners override grob properties internally
 • they do not have corresponding Lilypond objects
 
+see: http://abjad.mbrsi.org/api/tools/indicatortools/Arrow.html?highlight=arrow
+
 a = LP_Measure([4, 8], [1, 3, LP_Tuplet(7, [1, 2, 1, 2, 2]), 3], { rrand(60, 72) } ! 8);
 b = LP_Staff(a!2);
 b[(0..12)].attach(LP_ArrowText("tasto", "pont."));
@@ -17,6 +19,7 @@ LP_ArrowText : LP_CustomSpanner {
 	*new { |leftText, rightText|
 		^super.new.init(leftText, rightText);
 	}
+	//!!! BROKEN
 	init { |leftText, rightText|
 		spanner = LP_TextSpanner();
 		spanner.override(\style, "'line".asSymbol); //!!! an object is needed for quoting scheme objects

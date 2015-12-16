@@ -70,10 +70,14 @@ LP_RhythmTreeLeaf : LP_Leaf {
 		^this.class;
 	}
 	//!!! move up to LP_Object and inherit
-	override { |key, value|
+	override { |key, lp_Override|
+		if (overrides.isNil) { overrides = IdentityDictionary[] };
+		overrides[key] = lp_Override;
+	}
+	/*override { |key, value|
 		if (overrides.isNil) { overrides = OrderedIdentitySet[] };
 		overrides = overrides.add(key -> value);
-	}
+	}*/
 
 	isLastLeafInMeasure {
 		^if (this.root.notNil) { this.root.leaves.last == this } { false };
@@ -97,12 +101,9 @@ LP_RhythmTreeLeaf : LP_Leaf {
 }
 /* ---------------------------------------------------------------------------------------------------------------
 LP_Note
-
-a = LP_Measure([4, 4], [1, -1, 1], [61, [60, 64]]);
-LP_File(LP_Score([LP_Staff([a])])).write;
 --------------------------------------------------------------------------------------------------------------- */
 LP_Note : LP_RhythmTreeLeaf {
-	var <note, <noteName, <dynamic;
+	var <note, <noteName, <noteHead, <dynamic;
 	var namedPitch;
 	*new { |note=60, duration|
 		^super.new.init(note, duration);
@@ -113,6 +114,8 @@ LP_Note : LP_RhythmTreeLeaf {
 			duration = argDuration; //!!! update -- get rid of duration
 			writtenDuration = argDuration;
 		} { preProlatedDuration = argDuration.abs };
+		noteHead = LP_NoteHead();
+		this.attach(noteHead);
 	}
 	// midinote, LP noteName, or SC noteName
 	note_ { |argNote|
@@ -132,22 +135,22 @@ LP_Note : LP_RhythmTreeLeaf {
 }
 /* ---------------------------------------------------------------------------------------------------------------
 LP_Chord
-
-a = LP_Measure([4, 4], [1, -1, 1], [61, [60, 64]]);
-LP_File(LP_Score([LP_Staff([a])])).write;
 --------------------------------------------------------------------------------------------------------------- */
 LP_Chord : LP_RhythmTreeLeaf {
-	var <notes, <noteNames, <dynamic;
-	var namedPitches;
+	var <notes, <noteNames, <noteHeads, <dynamic;
+	var namedPitches, <tweaks;
 	*new { |notes, duration|
 		^super.new.init(notes, duration);
 	}
 	init { |argNotes, argDuration|
 		this.notes_(argNotes);
 		if (argDuration.isKindOf(LP_Duration)) {
-			duration = argDuration; //!!! update -- get rid of duration
+			duration = argDuration; //!!! -- get rid of duration
 			writtenDuration = argDuration;
 		} { preProlatedDuration = argDuration.abs };
+		noteHeads = LP_NoteHead() ! notes.size;
+		indicators = indicators.reject { |elem| elem.isKindOf(LP_NoteHead) }; //!!! NOT WORKING! BUG!
+		noteHeads.do { |noteHead, i| this.attach(noteHead) };
 	}
 	// midinote, LP noteName, or SC noteName
 	notes_ { |argNotes|
@@ -158,18 +161,10 @@ LP_Chord : LP_RhythmTreeLeaf {
 	noteNames_ { |noteNames|
 		this.notes_(noteNames);
 	}
-
-	/*dynamic_ { |argDynamic|
-		dynamic = argDynamic;
-	}*/
-	//!!! should at method return notes or a LP_VerticalMoment ??
-	at { |indices|
-		if (indices.isNumber) { indices = [indices] };
-		^notes.atAll(indices);
-	}
 	//!!! TODO: similar implementation to LP_Grob:override
-	tweak { |index|
-		this.notYetImplemented;
+	tweak { |index, lp_Tweak|
+		if (tweaks.isNil) { tweaks = [] };
+		tweaks[index] = lp_Tweak;
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
@@ -191,7 +186,7 @@ LP_MultimeasureRest
 LP_MultimeasureRest : LP_Rest {
 }
 /* ---------------------------------------------------------------------------------------------------------------
-LP_Skip
+LP_Skip (spacer rest)
 --------------------------------------------------------------------------------------------------------------- */
 LP_Skip : LP_Rest {
 }

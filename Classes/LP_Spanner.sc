@@ -36,7 +36,7 @@ LP_Spanner : LP_Object {
 }
 
 LP_Beam : LP_Spanner {
-	var <startToken="[", <endToken="]", <lpObj="Beam";
+	var <startToken="[", <endToken="]", <lpObj="Beam", <grobName="Beam";
 }
 
 LP_Crescendo : LP_Spanner {
@@ -117,7 +117,7 @@ LP_OttavaBracket : LP_Spanner {
 // see: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-asymmetric-slurs"
 // dotted and dashed slurs: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-changing-the-appearance-of-a-slur-from-solid-to-dotted-or-dashed"
 LP_PhrasingSlur : LP_Spanner {
-	var <startToken="\\(", <endToken="\\)", <lpObj="PhrasingSlur";
+	var <startToken="\\(", <endToken="\\)", <lpObj="PhrasingSlur", <overrideObj="Slur";
 }
 
 //!!! add vertical position and asymmetry (eccentricity) arguments
@@ -125,7 +125,7 @@ LP_PhrasingSlur : LP_Spanner {
 // see: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-asymmetric-slurs"
 // dotted and dashed slurs: "http://www.lilypond.org/doc/v2.19/Documentation/snippets/expressive-marks#expressive-marks-changing-the-appearance-of-a-slur-from-solid-to-dotted-or-dashed"
 LP_Slur : LP_Spanner {
-	var <startToken="(", <endToken=")", <lpObj="Slur";
+	var <startToken="(", <endToken=")", <lpObj="Slur", <overrideObj="Slur";
 }
 
 //!!! add style argument ??
@@ -198,5 +198,5 @@ LP_Glissando : LP_ComplexSpanner {
 //!!! TODO: must also prevent adding more than one LP_Tie to the leaf's spanners collection (instance variable)
 //!!! TODO: only allow tie if all leaves in the selection are non-rests and have the same note/s
 LP_Tie : LP_ComplexSpanner {
-	var <token="~", <lpObj="Tie";
+	var <token="~", <lpObj="Tie", <overrideObj="Tie";
 }

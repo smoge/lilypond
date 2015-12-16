@@ -1,42 +1,34 @@
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_Block
-
-- !!TODO: pass objects into storage containers (items, overrides, etc.), not their lpStrs
-- !!TODO: storage containers must be IdentityDictionaries, to ensure against duplication of keys/settings
-- !!TODO: add a method for inserting any arbitrary string into lpStr
 --------------------------------------------------------------------------------------------------------------- */
-LP_Block {
-	var <>name, <items, <overrides, <commands, <contextBlocks;
+LP_Block : LP_Object {
+	var <>name, <items, <contextBlocks;
 	*new { |name|
 		^super.new.init(name);
 	}
 	init { |argName|
 		name = argName;
-		items = OrderedIdentitySet[];
-		//items = IdentityDictionary[]; //!! see note above
-		overrides = OrderedIdentitySet[];
-		commands = OrderedIdentitySet[];
+		//items = OrderedIdentitySet[];
+		items = IdentityDictionary[];
 		contextBlocks = OrderedIdentitySet[];
 	}
 	add { |key, element|
-		items = items.add(key -> element);
-	}
-	override { |key, value|
-		overrides = overrides.add(key -> value);
-	}
-	addCommand { |command|
-		commands = commands.add(command);
+		//items = items.add(key -> element);
+		items[key] = element;
 	}
 	addContextBlock { |contextBlock|
 		contextBlocks = contextBlocks.add(contextBlock);
 	}
-	lpStr {
+	lpStr { |indent=0|
 		var str;
 		str = "\\" ++ name.asString + "{";
-		items.do { |assoc| str = str ++ "\n\t" ++ assoc.key + "=" + assoc.value.asString };
-		overrides.do { |assoc| str = str ++ "\n\t\\override" + assoc.key + "=" + assoc.value.asString };
-		commands.do { |command| str = str ++ "\n\t\\" ++ command.asString };
-		contextBlocks.do { |each| str = str ++ each.lpStr(indent: 1) };
+		//items.do { |assoc| str = str ++ "\n" ++ assoc.key + "=" + assoc.value.asString };
+		items.keysValuesDo { |key, val| str = str ++ "\n" ++ key + "=" + val.asString };
+		commands.do { |command| str = str ++ command.lpStr(1) };
+		sets.do { |set| str = str ++ set.lpStr(1) };
+		overrides.do { |override| str = str ++ override.lpStr(1) };
+		contextBlocks.do { |each| str = str ++ each.lpStr(1) };
+		if (indent > 0) { str = str.replace("\n", "\n".catList("\t" ! indent)) };
 		str = str ++ "\n}";
 		^str;
 	}
@@ -56,11 +48,13 @@ LP_ContextBlock : LP_Block {
 		var str;
 		str = "\n\\context {";
 		str = str ++ "\n\t\\Score";
-		items.do { |assoc| str = str ++ "\n\t" ++ assoc.key + "=" + assoc.value };
-		overrides.do { |assoc| str = str ++ "\n\t\\override" + assoc.key + "=" + assoc.value.asString };
-		commands.do { |command| str = str ++ "\n\t\\" ++ command.asString };
-		str = str ++ "\n}";
+		//items.do { |assoc| str = str ++ "\n\t" ++ assoc.key + "=" + assoc.value };
+		//items.keysValuesDo { |key, val| str = str ++ "\n" ++ key + "=" + val.asString };
+		commands.do { |command| str = str ++ command.lpStr(1) };
+		sets.do { |set| str = str ++ set.lpStr(1) };
+		overrides.do { |override| str = str ++ override.lpStr(1) };
 		if (indent > 0) { str = str.replace("\n", "\n".catList("\t" ! indent)) };
+		str = str ++ "\n}";
 		^str;
 	}
 }
@@ -93,7 +87,7 @@ LP_LayoutBlock : LP_Block {
 • LP_PaperBlock
 --------------------------------------------------------------------------------------------------------------- */
 LP_PaperBlock : LP_Block {
-	var <leftMargin, <rightMargin, <topMargin, <bottomMargin;
+	var <leftMargin, <rightMargin, <topMargin, <bottomMargin, <margin;
 	var <systemSystemSpacing, <scoreSystemSpacing;
 	var <systemCount, <pageCount;
 	var <indent, <raggedRight, <raggedBottom, <raggedLast;
@@ -118,12 +112,13 @@ LP_PaperBlock : LP_Block {
 	}
 	margin_ { |left=10, top=10, right=10, bottom=10|
 		this.leftMargin_(left).topMargin_(top).rightMargin_(right).bottomMargin_(bottom);
+		margin = [leftMargin, topMargin, rightMargin, bottomMargin]; //!!!
 	}
-	systemSystemSpacing_ { |basicDistance, minimumDistance, padding, stretchability|
+	systemSystemSpacing_ { |basicDistance=0, minimumDistance=0, padding=0, stretchability=0|
 		systemSystemSpacing = LP_SpacingVector(basicDistance, minimumDistance, padding, stretchability);
 		this.add('system-system-spacing', systemSystemSpacing.lpStr);
 	}
-	scoreSystemSpacing_ { |basicDistance, minimumDistance, padding, stretchability|
+	scoreSystemSpacing_ { |basicDistance=0, minimumDistance=0, padding=0, stretchability=0|
 		scoreSystemSpacing = LP_SpacingVector(basicDistance, minimumDistance, padding, stretchability);
 		this.add('score-system-spacing', scoreSystemSpacing.lpStr);
 	}
@@ -154,7 +149,8 @@ LP_PaperBlock : LP_Block {
 	lpStr { |indent=0|
 		var str;
 		str = "\\" ++ name.asString + "{";
-		items.do { |assoc| str = str ++ "\n\t" ++ assoc.key + "=" + assoc.value };
+		//items.do { |assoc| str = str ++ "\n\t" ++ assoc.key + "=" + assoc.value };
+		items.keysValuesDo { |key, val| str = str ++ "\n\t" ++ key + "=" + val.asString };
 		str = str ++ "\n}";
 		if (indent > 0) { str = str.replace("\n", "\n".catList("\t" ! indent)) };
 		^str;

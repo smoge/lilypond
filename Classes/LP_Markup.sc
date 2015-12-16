@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_Markup
 - position: \above, \below
-- x, y: Number, \left, \center, \right, \up, \down
+- x_(), y_(): Number, \left, \center, \right, \up, \down
 
 x = LP_Markup("foobar", \above, \center, 2.5);
 x.font_(Font("Helvetica", 12, bold: false, italic: true));
@@ -10,16 +10,14 @@ x.color_(Color.grey);
 x.lpStr;
 --------------------------------------------------------------------------------------------------------------- */
 LP_Markup : LP_Object {
-	var <string, <position, <x, <y;
-	var <decorators, <font, <>component;
-	*new { |string, position, x, y|
-		^super.new.init(string, position, x, y);
+	var <string, <position, <>x, <>y;
+	var <decorators, <font, <>component, <overrideObj="TextScript";
+	*new { |string, position|
+		^super.new.init(string, position);
 	}
-	init { |argString, argPosition, argX, argY|
+	init { |argString, argPosition|
 		string = argString;
 		position = argPosition;
-		x = argX;
-		y = argY;
 		decorators = OrderedIdentitySet[];
 	}
 	lpStr { |indent=0|

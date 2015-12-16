@@ -105,29 +105,6 @@ LP_NamedPitchParser {
 		^outStr;
 	}
 }
-
-// TODO
-LP_NoteHead {
-	var <client;
-	*new { |client|
-		^super.new.init(client);
-	}
-	init { |argClient|
-		client = argClient;
-	}
-	writtenPitch {
-	}
-	note {
-	}
-	isCautionary {
-	}
-	isForced {
-	}
-	isParenthesized {
-	}
-	tweak {
-	}
-}
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_StringParser
 - used in LP_Measure initialisation and by LP_Selection::notes_

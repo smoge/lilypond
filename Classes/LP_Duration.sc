@@ -38,7 +38,7 @@ LP_Duration {
 		base = Array.geom(8, 1, 2); // base values: no dots
 		dot1 = (base * 3); // 1 dot
 		dot2 = ((dot1 * 2) + base); // 2 dots
-		dot3 = ((dot2 * 2) + base); // 3 dots
+		//dot3 = ((dot2 * 2) + base); // 3 dots
 		dotted = [dot1, dot2].reduce(\union).sort;
 		nonPartitioned = [base, dot1, dot2].reduce(\union).sort;
 		partitioned = (1..128).symmetricDifference(nonPartitioned);
@@ -57,12 +57,13 @@ LP_Duration {
 		pair = [numerator, denominator];
 	}
 	isAssignable {
-		var index, bool;
+		/*var index, bool;
 		index = numerator.asBinaryString.indexOf($1);
 		if (index.isNil) { ^false };
 		bool = numerator.asBinaryString[index..].contains("01").not;
 		bool = bool && denominator.isPowerOfTwo;
-		^bool;
+		^bool;*/
+		^(nonPartitioned.includes(numerator) && denominator.isPowerOfTwo);
 	}
 	asDuration {
 		^this;
@@ -72,7 +73,7 @@ LP_Duration {
 		{ base.includes(numerator) } { 0 }
 		{ dot1.includes(numerator) } { 1 }
 		{ dot2.includes(numerator) } { 2 }
-		{ dot3.includes(numerator) } { 3 }
+		// { dot3.includes(numerator) } { 3 }
 		{ partitioned.includes(numerator) } { nil };
 	}
 	isDotted {

@@ -182,7 +182,7 @@
 			newLeaf.isTiedToNext_(isLastInSelection.not);
 			firstLeaf.parent.replace(firstLeaf, newLeaf);
 			if (clump.size > 1) { firstLeaf.parent.removeAll(clump[1..]) };
-			if (newLeaf.parent.isKindOf(LP_Tuplet)) { newLeaf.parent.rewrite }; // extract redundant tuplets
+			// if (newLeaf.parent.isKindOf(LP_Tuplet)) { newLeaf.parent.rewrite }; // extract redundant tuplets
 			newLeaf;
 		};
 	}

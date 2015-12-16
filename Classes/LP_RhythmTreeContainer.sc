@@ -16,8 +16,7 @@ LP_RhythmTreeContainer : LP_Container {
 	}
 	init1 { |duration|
 		preProlatedDuration = duration ? 1;
-		if (this.isKindOf(LP_Measure)) { this.update(duration) };
-		this.rewriteTuplets;
+		if (this.isKindOf(LP_Measure)) { this.update(duration).rewriteTuplets };
 	}
 	update { |argDuration|
 		duration = if (this.isRoot) { preProlatedDuration } { argDuration };
@@ -48,9 +47,6 @@ LP_RhythmTreeContainer : LP_Container {
 		isTuplet = (tupletNumerator != tupletDenominator); // can be true for LP_Measure and LP_Tuplet
 		tupletRatio = [tupletNumerator, tupletDenominator];
 		# tupletNumerator, tupletDenominator = (tupletRatio / tupletRatio.reduce(\gcd)).asInteger;
-	}
-	rewriteTuplets {
-		children.select { |child| child.isKindOf(LP_Tuplet) }.do { |tuplet| tuplet.rewrite };
 	}
 	prolation {
 		^if (isTuplet) { (tupletDenominator / tupletNumerator) } { 1 };
@@ -89,6 +85,17 @@ LP_FixedDurationContainer : LP_RhythmTreeContainer {
 	//!!! move up to LP_Object and inherit
 	notes_ { |notes|
 		if (notes.notNil) { this.selectBy(LP_PitchEvent).notes_(notes) };
+	}
+
+	rewrite {
+		if (this.leaves.size == 1) {
+			// TIDY THIS !!!
+			if (children[0].isKindOf(LP_TieContainer)) {
+				this.replace(children[0], children[0][0].preProlatedDuration_(this.preProlatedDuration.numerator));
+			} {
+				this.replace(children[0], children[0].preProlatedDuration_(this.preProlatedDuration.numerator));
+			};
+		};
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
@@ -162,20 +169,24 @@ LP_Measure : LP_FixedDurationContainer {
 			if (node.notNil) { node.obj };
 		};
 	}
+
+	rewriteTuplets {
+		this.do { |leaf| if (leaf.isKindOf(LP_FixedDurationContainer)) { this.rewrite } };
+	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_Tuplet
 --------------------------------------------------------------------------------------------------------------- */
 LP_Tuplet : LP_FixedDurationContainer {
 	isTrivial {
-		^(isTuplet.not || (children.size == 1));
+		^(isTuplet.not || (this.leaves.size == 1));
 	}
 	// replace trivial tuplets with their children
 	// durations of the children are rescaled to sum to the duration of the parent
 	rewrite {
 		var rescale, isRewritable;
 		if (this.isTrivial)  {
-			if (children.size == 1) {
+			if (this.leaves.size == 1) {
 				//!!! tidy this
 				if (children[0].isKindOf(LP_TieContainer)) {
 					this.parent.replace(this, children[0][0].preProlatedDuration_(this.preProlatedDuration));
@@ -195,6 +206,35 @@ LP_Tuplet : LP_FixedDurationContainer {
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_TieContainer
 - invisible to clients, behaves like a leaf
+
+a = LP_Measure([4, 4], [1, -1, 5, 1], [62, [60, 65], 64]);
+a[2].children.do { |e| e.noteHeads[0].color_(Color.black).style_(\cross) };
+
+a[2].noteHeads[0].color_(Color.black).style_(\cross);
+a[2].noteHeads[1].style_(\harmonic);
+a[2].attach(LP_Articulation('>'));
+LP_File(LP_Score([LP_Staff([a])])).write(openPDF: true);
+
+- interfaces for LP_Note and LP_Chord must also be implemented for LP_TieContainer
+LP_Note:
+note (  )
+noteName (  )
+noteHead (  )
+dynamic (  )
+note_ ( argNote )
+noteName_ ( noteName )
+
+LP_Chord:
+notes (  )
+noteNames (  )
+noteHeads (  )
+dynamic (  )
+tweaks (  )
+notes_ ( argNotes )
+noteNames_ ( noteNames )
+
+a = LP_Measure([4, 4], [1, -1, 5, 1], [62, 60]);
+a[2].noteHeads;
 --------------------------------------------------------------------------------------------------------------- */
 LP_TieContainer : LP_FixedDurationContainer {
 	var <>isTiedToNext=false;
@@ -211,20 +251,16 @@ LP_TieContainer : LP_FixedDurationContainer {
 	shallowClone {
 		^children[0].shallowClone.preProlatedDuration_(preProlatedDuration);
 	}
-	/*attach { |attachment|
+	attach { |attachment|
 		if (attachment.isKindOf(LP_Tie)) {
 			children.last.attach(attachment);
 		} { children.first.attach(attachment) };
-	}*/
-	last {
-		^children.last;
 	}
 	beatDuration {
 		var prolation;
 		prolation = this.parents.collect { |parent| parent.prolation }.reduce('*');
 		^duration.beatDuration * prolation;
 	}
-	// for use in LP_Player
 	type {
 		^children[0].class;
 	}

@@ -42,18 +42,12 @@ LP_File {
 		defaultPaperSize = [paper, orientation];
 	}
 	initDefaults {
-		/*scoreContextBlock.override('Score.SpacingSpanner.strict-note-spacing', "##t");
-		scoreContextBlock.override('SpacingSpanner.common-shortest-duration', "#(ly:make-moment 1/2)");
-		scoreContextBlock.override('TupletNumber.text', "#tuplet-number::calc-fraction-text");
-		scoreContextBlock.override('TupletBracket.direction', "#UP"); // this.add('tupletUp');*/
 		headerBlock.tagline_(false);
-		scoreContextBlock.add('tupletFullLength', "##t");
-		scoreContextBlock.addCommand('numericTimeSignature');
 		layoutBlock.addContextBlock(scoreContextBlock);
-		paperBlock.margin_(20, 20, 20, 20);
-		paperBlock.indent_(0);
-		paperBlock.systemSystemSpacing_(0, 0, 10, 0);
-		paperBlock.scoreSystemSpacing_(20, 20, 10, 0);
+		if (paperBlock.margin.isNil) { paperBlock.margin_(20, 20, 20, 20) };
+		if (paperBlock.indent.isNil) { paperBlock.indent_(0) };
+		if (paperBlock.systemSystemSpacing.isNil) { paperBlock.systemSystemSpacing_(0, 0, 10, 0) };
+		if (paperBlock.scoreSystemSpacing.isNil) { paperBlock.scoreSystemSpacing_(10, 10, 10, 0) };
 	}
 	write { |argPath, openPDF=true|
 		var paper, orientation;
