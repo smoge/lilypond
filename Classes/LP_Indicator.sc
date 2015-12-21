@@ -373,6 +373,10 @@ LP_MetronomeMark : LP_Indicator {
 		duration = argDuration;
 		bpm = argBpm;
 	}
+	// SC tempo
+	tempo {
+		^((bpm / 60) * duration.beatDuration);
+	}
 	lpStr {
 		^("\\tempo" + duration.lpStr + "=" + bpm.asString)
 	}

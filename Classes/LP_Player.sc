@@ -11,6 +11,8 @@ x = LP_Score([a, b, c]);
 LP_Player(x).playMIDI;
 // LP_Player(x).play;
 
+LP_EventList(x);
+
 // play a LP_Measure, LP_Voice or LP_Staff
 a = LP_Staff([LP_Measure([4, 8], [LP_Tuplet(3, [1,1,1]), LP_Tuplet(2, [1,1,1,1,1])])]);
 a.selectBy(LP_Event).mask([2, 3, -1, 2]);
@@ -18,6 +20,11 @@ a.selectBy(LP_PitchEvent).notes_([61, 62, 63]);
 LP_Player(a).play;
 
 LP_File(x).write("test1.ly");
+
+
+a = LP_Staff([LP_Measure([4, 4], [1, 1, 1, 1])]);
+a.selectBy(LP_PitchEvent).notes_([61, 62, 63, 64]);
+LP_Player(a, tempo: 160/60).play;
 --------------------------------------------------------------------------------------------------------------- */
 LP_Instrument {
 	var <name, <isMono;
@@ -31,13 +38,14 @@ LP_Instrument {
 }
 
 LP_Player {
-	var <eventList, <instruments;
-	*new { |music, instruments|
-		^super.new.init(music, instruments);
+	var <eventList, <instruments, <tempo;
+	*new { |music, instruments, tempo=1|
+		^super.new.init(music, instruments,tempo);
 	}
-	init { |music, argInstruments|
+	init { |music, argInstruments, argTempo|
 		eventList = LP_EventList(music);
 		instruments = argInstruments;
+		tempo = argTempo;
 	}
 	// array of patterns where each item = an independent voice
 	//!!! move this to LP_EventList::asPattern method ?
@@ -48,12 +56,12 @@ LP_Player {
 			if (instruments.notNil) {
 				instrument = instruments[i];
 				is (instrument.isMono) {
-					Pmono(instrument.name, \dur, Pseq(durs), \midinote, Pseq(midinotes));
+					Pmono(instrument.name, \dur, Pseq(durs), \midinote, Pseq(midinotes), \tempo, tempo);
 				} {
-					Pbind(\instrument, instrument.name, \dur, Pseq(durs), \midinote, Pseq(midinotes));
+					Pbind(\instrument, instrument.name, \dur, Pseq(durs), \midinote, Pseq(midinotes), \tempo, tempo);
 				};
 			} {
-				Pbind(\dur, Pseq(durs), \midinote, Pseq(midinotes));
+				Pbind(\dur, Pseq(durs), \midinote, Pseq(midinotes), \tempo, tempo);
 			};
 		};
 	}
