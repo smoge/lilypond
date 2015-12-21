@@ -133,7 +133,7 @@
 
 			tuplet = LP_Tuplet(this.preProlatedDuration, ratio.collect { |dur|
 				//!!! shallowClone needed ?? use cloneAttachmentsFrom and deprecate shallowClone ??
-				if (dur.isPositive) { firstLeaf.shallowClone.preProlatedDuration_(dur) } { LP_Rest(dur) };
+				if (dur.isPositive) { firstLeaf.shallowClone.isTiedToNext_(false).preProlatedDuration_(dur) } { LP_Rest(dur) };
 			});
 			if (notes.notNil) { tuplet.notes_(notes) };
 			firstLeaf.parent.replace(firstLeaf, tuplet);
