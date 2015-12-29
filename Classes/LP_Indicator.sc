@@ -255,6 +255,26 @@ LP_Arpeggio : LP_Indicator {
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
+• LP_KeySignature []
+
+a = LP_Measure([4, 4], [1], "<C4 E4 G4 Bb4>");
+a.attachToHead(LP_KeySignature(\e, \major));
+LP_File(LP_Score([LP_Staff([a])])).write;
+--------------------------------------------------------------------------------------------------------------- */
+LP_KeySignature : LP_Indicator {
+	var <tonic, <mode, <lpObj, <grobName;
+	*new { |tonic=\c, mode=\major|
+		^super.new.init(tonic, mode);
+	}
+	init { |argTonic, argMode|
+		tonic = argTonic;
+		mode = argMode;
+	}
+	lpStr {
+		^("\\key" + tonic.asString.toLower + "\\" ++ mode.asString.toLower);
+	}
+}
+/* ---------------------------------------------------------------------------------------------------------------
 • LP_LaissezVibrer []
 
 a = LP_Measure([4, 4], [1], "<C4 E4 G4 Bb4>");

@@ -191,12 +191,7 @@
 	----------------------------------------------------------------------------------------------------------- */
 	beamStructure_ { |beamStructure|
 		var selections, spanners;
-		components.do { |leaf|
-			spanners = leaf.spanners;
-			//!!! write a detach method that takes attachment class as an argument
-			//!!! e.g. detachByClass(LP_Beam)
-			spanners.removeAllSuchThat { |spanner| spanner.isKindOf(LP_Beam) };
-		};
+		// TODO!!! existing beams need to be remove here
 		beamStructure = beamStructure.offsets.min(this.size).as(OrderedIdentitySet).asArray.intervals;
 		selections = (0..(beamStructure.sum - 1)).clumps(beamStructure);
 		selections = selections.collect { |indices| LP_Selection(components[indices]) };

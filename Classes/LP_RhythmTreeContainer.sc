@@ -16,7 +16,8 @@ LP_RhythmTreeContainer : LP_Container {
 	}
 	init1 { |duration|
 		preProlatedDuration = duration ? 1;
-		if (this.isKindOf(LP_Measure)) { this.update(duration).rewriteTuplets };
+		//if (this.isKindOf(LP_Measure)) { this.update(duration).rewriteTuplets };
+		if (this.isKindOf(LP_Measure)) { this.update(duration) };
 	}
 	update { |argDuration|
 		duration = if (this.isRoot) { preProlatedDuration } { argDuration };
@@ -91,9 +92,9 @@ LP_FixedDurationContainer : LP_RhythmTreeContainer {
 		if (this.leaves.size == 1) {
 			// TIDY THIS !!!
 			if (children[0].isKindOf(LP_TieContainer)) {
-				this.replace(children[0], children[0][0].preProlatedDuration_(this.preProlatedDuration.numerator));
+				this.replace(children[0], children[0][0].preProlatedDuration_(this.preProlatedDuration));
 			} {
-				this.replace(children[0], children[0].preProlatedDuration_(this.preProlatedDuration.numerator));
+				this.replace(children[0], children[0].preProlatedDuration_(this.preProlatedDuration));
 			};
 		};
 	}
@@ -171,19 +172,26 @@ LP_Measure : LP_FixedDurationContainer {
 	}
 
 	rewriteTuplets {
-		this.do { |leaf| if (leaf.isKindOf(LP_FixedDurationContainer)) { this.rewrite } };
+		this.do { |node| if (node.isKindOf(LP_FixedDurationContainer)) { node.rewrite } };
 	}
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_Tuplet
+
+x = LP_Measure([3, 4], [LP_Tuplet(3, 1!5)]);
+x[0].tupletRatio_(1);
+LP_File(LP_Score([LP_Staff([x])])).write;
 --------------------------------------------------------------------------------------------------------------- */
 LP_Tuplet : LP_FixedDurationContainer {
 	isTrivial {
 		^(isTuplet.not || (this.leaves.size == 1));
 	}
+	// force tuplet ratio
+	tupletRatio_ {
+	}
 	// replace trivial tuplets with their children
 	// durations of the children are rescaled to sum to the duration of the parent
-	rewrite {
+	/*rewrite {
 		var rescale, isRewritable;
 		if (this.isTrivial)  {
 			if (this.leaves.size == 1) {
@@ -201,7 +209,7 @@ LP_Tuplet : LP_FixedDurationContainer {
 				if (isRewritable) { this.parent.replaceAll(this, children) };
 			};
 		};
-	}
+	}*/
 }
 /* ---------------------------------------------------------------------------------------------------------------
 • LP_TieContainer
